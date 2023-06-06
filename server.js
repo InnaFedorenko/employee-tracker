@@ -43,18 +43,18 @@ app.use(express.urlencoded({extended: true})); //extended false for not-encode u
 //   console.log("listening at http://localhost:" + PORT);
 // });
 
-// Connect to database
-const db = mysql.createConnection(
-  {
-    host: 'localhost',
-    // MySQL username,
-    user: 'root',
-    // TODO: Add MySQL password here
-    password: '280480',
-    database: 'company_db'
-  },
-  console.log(`Connected to the movies_db database.`)
-);
+// // Connect to database
+// const db = mysql.createConnection(
+//   {
+//     host: 'localhost',
+//     // MySQL username,
+//     user: 'root',
+//     // TODO: Add MySQL password here
+//     password: '280480',
+//     database: 'company_db'
+//   },
+//   console.log(`Connected to the movies_db database.`)
+// );
 
 // // Read all movies
 // app.get('/api/movies', (req, res) => {

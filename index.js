@@ -18,18 +18,27 @@
 
 
 // Connect Menu module
-const menu = require ('./helpers/menuUtils');
+const menu = require('./helpers/menuUtils');
 const dbUtils = require('./helpers/dbUtils');
 const apiUtils = require('./helpers/apiUtils');
 // const {showMenu} = require('./helpers/menu');
-  
+
 
 // Function to initialize app
 function init() {
-    console.log('\x1b[33m%s\x1b[0m',`Welcome to the Employee Manager!`);
-   apiUtils.connectToServer();
-   dbUtils.connectToDB();
-   menu.showMenuItems();
+    console.log('\x1b[33m%s\x1b[0m', `Welcome to the Employee Manager!`);
+
+    const departmentQuery = 'SELECT * FROM department';
+    const roleQuery = 'SELECT * FROM role';
+    const employeeQuery = 'SELECT * FROM employee';
+
+    // Fetch departments
+    dbUtils.fetchDataFromDB(departmentQuery);
+    //Fetch roles
+    dbUtils.fetchDataFromDB(roleQuery);
+    //Fetch employee
+    dbUtils.fetchDataFromDB(employeeQuery);
+    //menu.showMenuItems();
     // ToDO - Call the drawBanner function
     // drawBanner();
     // generateSVG.run();

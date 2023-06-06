@@ -1,23 +1,34 @@
 // Import and require mysql2
 const mysql = require('mysql2');
+
+//Connect object modules
+const Database = require('../objects/database');
+const Department = require('../objects/department');
+const Role = require('../objects/role');
+const Employee = require('../objects/employee');
+
 // Connect to database
-function connectToDB() {
-    const db = mysql.createConnection(
-        {
-            host: 'localhost',
-            // MySQL username,
-            user: 'root',
-            //  MySQL password here
-            password: '280480',
-            database: 'company_db'
-        },
-        console.log(`Connected to the company_db database.`)
-    );
-    // Query database
-    db.query('SELECT * FROM department', function (err, results) {
-        console.log(results);
-    });
-}
+async function fetchDataFromDB(query) {
+        const config = {
+          host: 'localhost',
+          user: 'root',
+          password: '280480',
+          database: 'company_db',
+          waitForConnections: true,
+          connectionLimit: 10,
+          queueLimit: 0
+        };
+        const database = new Database(config);
+        try {
+          const data = await database.query(query);
+          console.log('Data:', data);
+        } catch (error) {
+          console.error('Error:', error);
+        } finally {
+          database.pool.end();
+        }
+      }
+
 module.exports = {
-    connectToDB
+    fetchDataFromDB
 };

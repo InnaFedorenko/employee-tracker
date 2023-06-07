@@ -3,6 +3,7 @@ const inquirer = require('inquirer');
 const Department = require('../objects/department');
 const Employee = require('../objects/employee');
 const Role = require('../objects/role');
+const {showTable} = require ('./printUtils');
 
 // Connect Database module
 const dbUtils = require ('./dbUtils');
@@ -44,19 +45,6 @@ async function mainMenu(){
         'View the total utilized budget of a department': 'SELECT SUM(role.salary) AS total_budget FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id WHERE department.id = ?;',
       };
 
-    // const departmentQuery = 'SELECT * FROM department';
-    // const roleQuery = 'SELECT * FROM role';
-    // const employeeQuery = 'SELECT * FROM employee';
-
-    // Fetch departments
-    //dbUtils.fetchDataFromDB(departmentQuery);
-    //Fetch roles
-    //dbUtils.fetchDataFromDB(roleQuery);
-    //Fetch employee
-    //dbUtils.fetchDataFromDB(employeeQuery);
-    // console.log(menuItems)
-    //    inquirer.prompt(menuItems).then(selectMenuItem);
-
     try {
         const answer = await inquirer.prompt({
           type: 'list',
@@ -80,7 +68,8 @@ async function mainMenu(){
     
         // Run the SQL query based on the selected menu item
         console.log('Running query:', sqlQuery);
-        await dbUtils.fetchDataFromDB(sqlQuery);
+         const dbData = await dbUtils.fetchDataFromDB(sqlQuery);
+        showTable (dbData);
         // After running the query, return to the main menu
         await mainMenu();
       } catch (error) {

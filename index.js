@@ -16,29 +16,26 @@
 // WHEN I choose to update an employee role
 // THEN I am prompted to select an employee to update and their new role and this information is updated in the database 
 
+// Bonus
+// Fulfilling any of the following can add up to 20 points to your grade. Note that the highest grade you can achieve is still 100:
+// Application allows users to update employee managers (2 points).
+// Application allows users to view employees by manager (2 points).
+// Application allows users to view employees by department (2 points).
+// Application allows users to delete departments, roles, and employees (2 points for each).
+// Application allows users to view the total utilized budget of a department—in other words, the combined salaries of all employees in that department (8 points).
 
 // Connect Menu module
-const menu = require('./helpers/menuUtils');
+const {mainMenu} = require('./helpers/menuUtils');
 const dbUtils = require('./helpers/dbUtils');
-const apiUtils = require('./helpers/apiUtils');
-// const {showMenu} = require('./helpers/menu');
+//const apiUtils = require('./helpers/apiUtils');
+
 
 
 // Function to initialize app
 function init() {
     console.log('\x1b[33m%s\x1b[0m', `Welcome to the Employee Manager!`);
 
-    const departmentQuery = 'SELECT * FROM department';
-    const roleQuery = 'SELECT * FROM role';
-    const employeeQuery = 'SELECT * FROM employee';
-
-    // Fetch departments
-    dbUtils.fetchDataFromDB(departmentQuery);
-    //Fetch roles
-    dbUtils.fetchDataFromDB(roleQuery);
-    //Fetch employee
-    dbUtils.fetchDataFromDB(employeeQuery);
-    //menu.showMenuItems();
+    mainMenu();
     // ToDO - Call the drawBanner function
     // drawBanner();
     // generateSVG.run();

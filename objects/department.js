@@ -1,8 +1,10 @@
-// const mysql = require('../node_modules/mysql2');
+// Connect Shape module with the parent constructor
+const Table = require('./table');
 
-class Department {
-  constructor(id, name) {
-    this.id = id;
+class Department extends Table {
+  constructor(name) {
+    const fields = ['id INT NOT NULL AUTO_INCREMENT', 'name VARCHAR(30) NOT NULL', 'PRIMARY KEY (id)'];
+    super('department', fields);
     this.name = name;
   }
 }

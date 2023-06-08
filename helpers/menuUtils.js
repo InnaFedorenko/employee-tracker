@@ -6,7 +6,7 @@ const Role = require('../objects/role');
 const { showTable } = require('./printUtils');
 
 // Connect Database module
-const { fetchDataFromDB, getAllDepartments, getAllRoles, getAllEmployee } = require('./dbUtils');
+const { fetchDataFromDB, getAllDepartments, getAllRoles, getAllEmployee, deleteRole } = require('./dbUtils');
 // Prompt for employee details
 
 async function promptDepartments() {
@@ -79,7 +79,7 @@ async function promptEmployees() {
     // console.log(`managerData: ${JSON.stringify(managerData)}`);
     const roleId = roleData.find(roleData => roleData.role === answers.roleName)?.id;
     //const managerId = managerData.find(managerData => managerData.ManagerName === answers.managerName)?.id;
-    const managerId = answers.managerName === "No Manager" ? null: managerData.find(managerData => managerData.name === answers.managerName)?.id;
+    const managerId = answers.managerName === "No Manager" ? null : managerData.find(managerData => managerData.name === answers.managerName)?.id;
 
     //first_name, last_name, role_id, manager_id
     const employee = new Employee({ first_name: answers.firstName, last_name: answers.firstName, role_id: roleId, manager_id: managerId });
@@ -106,7 +106,7 @@ async function promptEmployeeRole() {
     );
     const roleId = roleData.find(roleData => roleData.role === answers.roleName)?.id;
     const employeeId = employeeData.find(employeeData => employeeData.name === answers.employeeName)?.id;
-    const newRole = {roleId: roleId, id:employeeId};
+    const newRole = { roleId: roleId, id: employeeId };
     return newRole;
 }
 async function promptDepartmentId() {
@@ -121,8 +121,38 @@ async function promptDepartmentId() {
         }]
     );
     const id = departmentData.find(departmentData => departmentData.name === answers.departmentName)?.id;
-    const depObj = {name: answers.departmentName, id:id}
+    const depObj = { name: answers.departmentName, id: id }
     return depObj;
+}
+async function promptRoleId() {
+    const roleData = await getAllRoles();
+    const roleNames = roleData.map(row => row.role);
+    const answers = await inquirer.prompt(
+        [{
+            type: 'list',
+            name: 'roleName',
+            message: 'Choose a role',
+            choices: roleNames,
+        }]
+    );
+    const roleId = roleData.find(roleData => roleData.role === answers.roleName)?.id;
+    const RoleObj = { name: answers.roleName, id: roleId }
+    return RoleObj;
+}
+async function promptEmployeeId() {
+    const employeeData = await getAllEmployee();
+    const employeeNames = employeeData.map(obj => obj.name);
+    const answers = await inquirer.prompt(
+        [{
+            type: 'list',
+            name: 'employeeName',
+            message: 'Choose employee to delete',
+            choices: employeeNames,
+        }]
+    );
+    const employeeId = employeeData.find(employeeData => employeeData.name === answers.employeeName)?.id;
+    const employeeObj = { name: answers.employeeName, id: employeeId }
+    return employeeObj;
 }
 async function mainMenu() {
     const menuItems = [
@@ -135,27 +165,27 @@ async function mainMenu() {
         'Update employee role',
         // 'Update employee managers',
         // 'View employees by manager',
-        // 'View employees by department',
-        // 'Delete departments',
-        // 'Delete Roles',
-        // 'Delete employees',
+        'View employees by department',
+        'Delete department',
+        'Delete role',
+        'Delete employee',
         'View the total utilized budget of a department',
         'Quit',
     ];
     const sqlQueries = {
         'View all departments': 'SELECT * FROM department;',
-        'View all roles': 'SELECT role.title AS Role, role.id AS ID, department.name AS Department, role.salary AS Salary FROM role JOIN department ON department.id = role.department_id;',
-        'View all employees': `SELECT employee.id AS EmployeeID, employee.first_name AS FirstName, employee.last_name AS LastName, role.title AS JobTitle, department.name AS Department, IFNULL(role.salary, '--') AS Salary, CONCAT(IFNULL(manager.first_name, '--'), ' ', IFNULL(manager.last_name, '--')) AS Manager FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id LEFT JOIN employee AS manager ON employee.manager_id = manager.id ORDER BY employee.id;`,
+        'View all roles': `SELECT role.title AS Role, role.id AS ID, IFNULL(department.name, '--') AS Department, role.salary AS Salary FROM role Left JOIN department ON department.id = role.department_id;`,
+        'View all employees': `SELECT employee.id AS EmployeeID, employee.first_name AS FirstName, employee.last_name AS LastName, IFNULL(role.title, '--') AS JobTitle, IFNULL(department.name, '--') AS Department, IFNULL(role.salary, '--') AS Salary, CONCAT(IFNULL(manager.first_name, '--'), ' ', IFNULL(manager.last_name, '--')) AS Manager FROM employee Left JOIN role ON employee.role_id = role.id Left JOIN department ON role.department_id = department.id LEFT JOIN employee AS manager ON employee.manager_id = manager.id ORDER BY employee.id;`,
         'Add a department': 'INSERT INTO department (name) VALUES (?);',
         'Add a role': 'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?);',
         'Add an employee': 'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?);',
         'Update employee role': 'UPDATE employee SET role_id = ? WHERE id = ?;',
         'Update employee managers': 'UPDATE employee SET manager_id = ? WHERE id = ?;',
         'View employees by manager': 'SELECT * FROM employee WHERE manager_id = ?;',
-        'View employees by department': 'SELECT employee.* FROM employee join role on role.id = role_id join department on department.id = role.department_id where department.id = ?;',
-        'Delete departments': 'DELETE FROM department WHERE id = ?;',
-        'Delete Roles': 'DELETE FROM role WHERE id = ?;',
-        'Delete employees': 'DELETE FROM employee WHERE id = ?;',
+        'View employees by department': `SELECT employee.first_name AS FirstName, employee.last_name AS LastName, IFNULL(role.title, '--') AS JobTitle, IFNULL(department.name, '--') AS Department FROM employee left join role on role.id = role_id left join department on department.id = role.department_id where department.id = ?;`,
+        'Delete department': 'DELETE FROM department WHERE id = ?;',
+        'Delete Role': `BEGIN; UPDATE employee SET role_id = NULL WHERE role_id = ?; DELETE FROM role WHERE id = ?; COMMIT;`,
+        'Delete employee': 'DELETE FROM employee WHERE id = ?;',
         'View the total utilized budget of a department': `SELECT IFNULL(SUM(role.salary),'0') AS total_budget FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id WHERE department.id = ?;`,
     };
 
@@ -194,21 +224,47 @@ async function mainMenu() {
                 await mainMenu();
                 break;
             case 'Update employee role':
-                 sqlArgs = Object.values(await promptEmployeeRole());
-                 console.log(sqlQuery + sqlArgs);
-                 message = `<${sqlArgs}> employee's role was updated. Select View all employee option to see it.`;
+                sqlArgs = Object.values(await promptEmployeeRole());
+                console.log(sqlQuery + sqlArgs);
+                message = `<${sqlArgs}> employee's role was updated. Select View all employee option to see it.`;
                 const employeeUpdate = await fetchDataFromDB(sqlQuery, sqlArgs, message);
                 await mainMenu();
                 break;
             // Handle other menu options
-            case 'View the total utilized budget of a department':                
+            // 'Update employee managers',
+            // 'View employees by manager',
+            case 'View employees by department':
+                sqlArgs = await promptDepartmentId();
+                const viewEmployeesByDepartment = await fetchDataFromDB(sqlQuery, sqlArgs.id);
+                showTable(viewEmployeesByDepartment);
+                await mainMenu();
+                break;            
+            case 'Delete department':
+                sqlArgs = await promptDepartmentId();
+                message = `<${sqlArgs.name}> department was deleted. Select View all departments option to see it.`;
+                const deleteDepartment = await fetchDataFromDB(sqlQuery, sqlArgs.id, message);
+                await mainMenu();
+                break;
+            case 'Delete role':
+                sqlArgs = await promptRoleId();
+                message = `<${sqlArgs.name}> role was deleted. Select View all roles option to see it.`;
+                const roleDeleted = await deleteRole(sqlArgs.id, message);
+                await mainMenu();
+                break;    
+                case 'Delete employee':
+                    sqlArgs = await promptEmployeeId();
+                    message = `<${sqlArgs.name}> employee was deleted. Select View all employees option to see it.`;
+                    const deleteEmployee = await fetchDataFromDB(sqlQuery, sqlArgs.id, message);
+                    await mainMenu();
+                    break;       
+            case 'View the total utilized budget of a department':
                 sqlArgs = await promptDepartmentId();
                 message = ''; //`<${sqlArgs.name}> department's budget is below:`;
                 const budgetArray = await fetchDataFromDB(sqlQuery, sqlArgs.id, message);
-                const budgetValue=[{Department: sqlArgs.name, Budget: budgetArray[0].total_budget}]
+                const budgetValue = [{ Department: sqlArgs.name, Budget: budgetArray[0].total_budget }]
                 showTable(budgetValue);
                 await mainMenu();
-                break;            
+                break;                       
             case 'Quit':
                 console.log('\x1b[33m%s\x1b[0m', 'Goodbye!');
                 break;

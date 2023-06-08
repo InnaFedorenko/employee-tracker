@@ -109,6 +109,21 @@ async function promptEmployeeRole() {
     const newRole = {roleId: roleId, id:employeeId};
     return newRole;
 }
+async function promptDepartmentId() {
+    const departmentData = await getAllDepartments();
+    const departmentNames = departmentData.map(obj => obj.name);
+    const answers = await inquirer.prompt(
+        [{
+            type: 'list',
+            name: 'departmentName',
+            message: 'Choose a department',
+            choices: departmentNames,
+        }]
+    );
+    const id = departmentData.find(departmentData => departmentData.name === answers.departmentName)?.id;
+    const depObj = {name: answers.departmentName, id:id}
+    return depObj;
+}
 async function mainMenu() {
     const menuItems = [
         'View all departments',
@@ -124,7 +139,7 @@ async function mainMenu() {
         // 'Delete departments',
         // 'Delete Roles',
         // 'Delete employees',
-        // 'View the total utilized budget of a department',
+        'View the total utilized budget of a department',
         'Quit',
     ];
     const sqlQueries = {
@@ -141,7 +156,7 @@ async function mainMenu() {
         'Delete departments': 'DELETE FROM department WHERE id = ?;',
         'Delete Roles': 'DELETE FROM role WHERE id = ?;',
         'Delete employees': 'DELETE FROM employee WHERE id = ?;',
-        'View the total utilized budget of a department': 'SELECT SUM(role.salary) AS total_budget FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id WHERE department.id = ?;',
+        'View the total utilized budget of a department': `SELECT IFNULL(SUM(role.salary),'0') AS total_budget FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id WHERE department.id = ?;`,
     };
 
     try {
@@ -186,6 +201,14 @@ async function mainMenu() {
                 await mainMenu();
                 break;
             // Handle other menu options
+            case 'View the total utilized budget of a department':                
+                sqlArgs = await promptDepartmentId();
+                message = ''; //`<${sqlArgs.name}> department's budget is below:`;
+                const budgetArray = await fetchDataFromDB(sqlQuery, sqlArgs.id, message);
+                const budgetValue=[{Department: sqlArgs.name, Budget: budgetArray[0].total_budget}]
+                showTable(budgetValue);
+                await mainMenu();
+                break;            
             case 'Quit':
                 console.log('\x1b[33m%s\x1b[0m', 'Goodbye!');
                 break;

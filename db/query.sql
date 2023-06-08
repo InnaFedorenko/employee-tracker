@@ -15,7 +15,7 @@ SELECT employee.* FROM employee join role on role.id = role_id join department o
 DELETE FROM department WHERE id = 3;
 DELETE FROM role WHERE id = 3;
 DELETE FROM employee WHERE id = 11;
-SELECT SUM(role.salary) AS total_budget FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id WHERE department.id = 1;
+SELECT IFNULL(SUM(role.salary),'0') AS total_budget FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id WHERE department.id = 1;
 
 
 

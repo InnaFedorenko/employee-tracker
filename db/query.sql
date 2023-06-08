@@ -30,3 +30,7 @@ select distinct manager.* from employee AS manager JOIN employee AS reporter ON 
 SELECT employee.id AS ManagerID, CONCAT(IFNULL(employee.first_name, '--'), ' ', IFNULL(employee.last_name, '--')) AS ManagerName FROM employee;
 
 SELECT CONCAT(role.title, ' - ' , department.name) AS role, role.id AS id, department.name AS department, role.salary AS Salary FROM role JOIN department ON department.id = role.department_id;
+
+
+
+    SELECT employee.id AS EmployeeID, employee.first_name AS FirstName, employee.last_name AS LastName, IFNULL(role.title, '--') AS JobTitle, IFNULL(department.name, '--') AS Department, IFNULL(role.salary, '--') AS Salary, CONCAT(IFNULL(manager.first_name, '--'), ' ', IFNULL(manager.last_name, '--')) AS Manager FROM employee Left JOIN role ON employee.role_id = role.id Left JOIN department ON role.department_id = department.id LEFT JOIN employee AS manager ON employee.manager_id = manager.id  where employee.manager_id = 1 ORDER BY employee.id

@@ -154,6 +154,21 @@ async function promptEmployeeId() {
     const employeeObj = { name: answers.employeeName, id: employeeId }
     return employeeObj;
 }
+async function promptManagerId() {
+    const managerData = await getAllEmployee();
+    const managerNames = managerData.map(obj => obj.name);
+    const answers = await inquirer.prompt(
+        [{
+            type: 'list',
+            name: 'managerName',
+            message: 'Choose manager',
+            choices: managerNames,
+        }]
+    );
+    const managerId = managerData.find(managerData => managerData.name === answers.managerName)?.id;
+    const managerObj = { name: answers.managerName, id: managerId }
+    return managerObj;
+}
 async function mainMenu() {
     const menuItems = [
         'View all departments',
@@ -164,7 +179,7 @@ async function mainMenu() {
         'Add an employee',
         'Update employee role',
         // 'Update employee managers',
-        // 'View employees by manager',
+        'View employees by manager',
         'View employees by department',
         'Delete department',
         'Delete role',
@@ -181,7 +196,7 @@ async function mainMenu() {
         'Add an employee': 'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?);',
         'Update employee role': 'UPDATE employee SET role_id = ? WHERE id = ?;',
         'Update employee managers': 'UPDATE employee SET manager_id = ? WHERE id = ?;',
-        'View employees by manager': 'SELECT * FROM employee WHERE manager_id = ?;',
+        'View employees by manager': `SELECT employee.id AS EmployeeID, employee.first_name AS FirstName, employee.last_name AS LastName, IFNULL(role.title, '--') AS JobTitle, IFNULL(department.name, '--') AS Department, IFNULL(role.salary, '--') AS Salary, CONCAT(IFNULL(manager.first_name, '--'), ' ', IFNULL(manager.last_name, '--')) AS Manager FROM employee Left JOIN role ON employee.role_id = role.id Left JOIN department ON role.department_id = department.id LEFT JOIN employee AS manager ON employee.manager_id = manager.id  where employee.manager_id = ? ORDER BY employee.id`,
         'View employees by department': `SELECT employee.first_name AS FirstName, employee.last_name AS LastName, IFNULL(role.title, '--') AS JobTitle, IFNULL(department.name, '--') AS Department FROM employee left join role on role.id = role_id left join department on department.id = role.department_id where department.id = ?;`,
         'Delete department': 'DELETE FROM department WHERE id = ?;',
         'Delete Role': `BEGIN; UPDATE employee SET role_id = NULL WHERE role_id = ?; DELETE FROM role WHERE id = ?; COMMIT;`,
@@ -232,7 +247,12 @@ async function mainMenu() {
                 break;
             // Handle other menu options
             // 'Update employee managers',
-            // 'View employees by manager',
+            case 'View employees by manager':
+                sqlArgs = await promptManagerId();
+                const viewEmployeesByManager = await fetchDataFromDB(sqlQuery, sqlArgs.id);
+                showTable(viewEmployeesByManager);
+                await mainMenu();
+                break;               
             case 'View employees by department':
                 sqlArgs = await promptDepartmentId();
                 const viewEmployeesByDepartment = await fetchDataFromDB(sqlQuery, sqlArgs.id);

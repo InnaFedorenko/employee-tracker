@@ -3,7 +3,7 @@ const mysql = require('../node_modules/mysql2/promise');
 class Database {
   constructor(config) {
     this.pool = mysql.createPool(config);
-    console.log(`Connected to the ${config.database} database.`);
+    // console.log(`Connected to the ${config.database} database.`);
   }
 
   async query(sql, args) {

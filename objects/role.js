@@ -2,19 +2,10 @@
 const Table = require('./table');
 
 class Role extends Table {
-  constructor(departmentId, title, salary) {
-    const fields = [
-      'id INT NOT NULL AUTO_INCREMENT',
-      'department_id INT',
-      'title VARCHAR(30) NOT NULL',
-      'salary DECIMAL',
-      'PRIMARY KEY (id)',
-      'FOREIGN KEY (department_id) REFERENCES department(id) ON DELETE SET NULL'
-    ];
+  constructor(fields) {
+    //const fields = ['id','department_id','title','salary'];
     super('role', fields);
-    this.departmentId = departmentId;
-    this.title = title;
-    this.salary = salary;
+    const {id, title, salary, department_id} = this.fields
   }
 }
     // Export Role module

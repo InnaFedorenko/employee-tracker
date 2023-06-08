@@ -42,7 +42,8 @@ const config = {
       }
     ]);
   }
-
+    // ToDO - Call the drawBanner function
+    // drawBanner();
 module.exports = {
     showTable
 };

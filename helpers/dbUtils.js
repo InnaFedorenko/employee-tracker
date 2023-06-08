@@ -6,10 +6,9 @@ const Database = require('../objects/database');
 const Department = require('../objects/department');
 const Role = require('../objects/role');
 const Employee = require('../objects/employee');
-const { showTable } = require('./printUtils');
 
 // Connect to database
-async function fetchDataFromDB(query) {
+async function fetchDataFromDB(query, args, message) {
         const config = {
           host: 'localhost',
           user: 'root',
@@ -21,9 +20,8 @@ async function fetchDataFromDB(query) {
         };
         const database = new Database(config);
         try {
-          const data = await database.query(query);
-          //console.log('Data:', data);
-          //showTable (data);
+          const data = await database.query(query,args);
+          if(message) {console.log('\x1b[32m%s\x1b[0m',message)};
           return data;
         } catch (error) {
           console.error('Error:', error);

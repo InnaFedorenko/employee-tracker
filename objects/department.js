@@ -2,10 +2,9 @@
 const Table = require('./table');
 
 class Department extends Table {
-  constructor(name) {
-    const fields = ['id INT NOT NULL AUTO_INCREMENT', 'name VARCHAR(30) NOT NULL', 'PRIMARY KEY (id)'];
+  constructor(fields) {
     super('department', fields);
-    this.name = name;
+    const {id, name} = this.fields
   }
 }
   // Export Department module

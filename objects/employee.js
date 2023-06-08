@@ -1,6 +1,6 @@
 // Connect Shape module with the parent constructor
 const Table = require('./table');
-
+// Constructor for employee
 class Employee extends Table {
     constructor(fields) {
       super('employee', fields);

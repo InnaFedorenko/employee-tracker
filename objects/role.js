@@ -1,6 +1,6 @@
 // Connect Shape module with the parent constructor
 const Table = require('./table');
-
+// Constructor for role
 class Role extends Table {
   constructor(fields) {
     //const fields = ['id','department_id','title','salary'];

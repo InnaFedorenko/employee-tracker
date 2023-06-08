@@ -3,10 +3,8 @@ const mysql = require('mysql2');
 
 //Connect object modules
 const Database = require('../objects/database');
-// const Department = require('../objects/department');
-// const Role = require('../objects/role');
-// const Employee = require('../objects/employee');
 
+//Database config with parameters
 const config = {
   host: 'localhost',
   user: 'root',
@@ -30,18 +28,22 @@ async function fetchDataFromDB(query, args, message) {
     database.pool.end();
   }
 }
+// This function returns all departments from db
 async function getAllDepartments() {
   const departmentData = await fetchDataFromDB('SELECT * FROM department');
   return departmentData
 }
+// This function returns all roles from db
 async function getAllRoles() {
   const roleData = await fetchDataFromDB(`SELECT CONCAT(role.title, ' - ' , department.name) AS role, role.id AS id, department.name AS department, role.salary AS Salary FROM role JOIN department ON department.id = role.department_id;`);
   return roleData;
 }
+// This function returns all employees from db
 async function getAllEmployee() {
   const managersData = await fetchDataFromDB(`SELECT employee.id AS id, CONCAT(IFNULL(employee.first_name, '--'), ' ', IFNULL(employee.last_name, '--')) AS name FROM employee;`);
   return managersData;
 }
+// This function delete roles from db that has id equal to id parameter value, message parameter contains deletion notification for user
 async function deleteRole(id, message) {
   const connection = new Database(config);
   // Execute the transaction
@@ -61,6 +63,7 @@ try {
 }
 }
 
+// export for all module's functions
 module.exports = {
   fetchDataFromDB,
   getAllDepartments,

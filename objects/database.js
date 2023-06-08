@@ -1,11 +1,11 @@
+// Connect mysql2 module to communicate with database
 const mysql = require('../node_modules/mysql2/promise');
-
+// Constructor for database
 class Database {
   constructor(config) {
     this.pool = mysql.createPool(config);
     // console.log(`Connected to the ${config.database} database.`);
   }
-
   async query(sql, args) {
     try {
       const connection = await this.pool.getConnection();

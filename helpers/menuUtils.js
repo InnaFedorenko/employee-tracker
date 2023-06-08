@@ -1,14 +1,16 @@
 // Connect inquirer package
 const inquirer = require('inquirer');
+// Connect object constructors
 const Department = require('../objects/department');
 const Employee = require('../objects/employee');
 const Role = require('../objects/role');
+// Connect print module for print data in the terminall
 const { showTable } = require('./printUtils');
 
 // Connect Database module
 const { fetchDataFromDB, getAllDepartments, getAllRoles, getAllEmployee, deleteRole } = require('./dbUtils');
-// Prompt for employee details
 
+// This function prompts and return a department details
 async function promptDepartments() {
     const answer = await inquirer.prompt(
         {
@@ -19,6 +21,7 @@ async function promptDepartments() {
     );
     return answer.name;
 }
+// This function prompts and return a role details
 async function promptRoles() {
     const departmentData = await getAllDepartments();
     const departmentNames = departmentData.map(obj => obj.name);
@@ -44,6 +47,7 @@ async function promptRoles() {
     const role = new Role({ title: answers.title, salary: answers.salary, department_id: departmentId });
     return role.fields;
 }
+// This function prompts and return an employee details
 async function promptEmployees() {
     const roleData = await getAllRoles();
     const roleNames = roleData.map(row => row.role);
@@ -85,6 +89,7 @@ async function promptEmployees() {
     const employee = new Employee({ first_name: answers.firstName, last_name: answers.firstName, role_id: roleId, manager_id: managerId });
     return employee.fields;
 }
+// This function prompts employee and their role details 
 async function promptEmployeeRole() {
     const roleData = await getAllRoles();
     const roleNames = roleData.map(row => row.role);
@@ -109,6 +114,7 @@ async function promptEmployeeRole() {
     const newRole = { roleId: roleId, id: employeeId };
     return newRole;
 }
+// This function prompts department name to return department id
 async function promptDepartmentId() {
     const departmentData = await getAllDepartments();
     const departmentNames = departmentData.map(obj => obj.name);
@@ -124,6 +130,7 @@ async function promptDepartmentId() {
     const depObj = { name: answers.departmentName, id: id }
     return depObj;
 }
+// This function prompts role name to return role id
 async function promptRoleId() {
     const roleData = await getAllRoles();
     const roleNames = roleData.map(row => row.role);
@@ -139,6 +146,7 @@ async function promptRoleId() {
     const RoleObj = { name: answers.roleName, id: roleId }
     return RoleObj;
 }
+// This function prompts employee name to return employee id
 async function promptEmployeeId() {
     const employeeData = await getAllEmployee();
     const employeeNames = employeeData.map(obj => obj.name);
@@ -154,6 +162,7 @@ async function promptEmployeeId() {
     const employeeObj = { name: answers.employeeName, id: employeeId }
     return employeeObj;
 }
+// This function prompts manager name to return department manager id
 async function promptManagerId() {
     const managerData = await getAllEmployee();
     const managerNames = managerData.map(obj => obj.name);
@@ -169,7 +178,9 @@ async function promptManagerId() {
     const managerObj = { name: answers.managerName, id: managerId }
     return managerObj;
 }
+// This function executes main menu
 async function mainMenu() {
+    // List menu items
     const menuItems = [
         'View all departments',
         'View all roles',
@@ -178,7 +189,7 @@ async function mainMenu() {
         'Add a role',
         'Add an employee',
         'Update employee role',
-        // 'Update employee managers',
+        'Update employee manager',
         'View employees by manager',
         'View employees by department',
         'Delete department',
@@ -187,6 +198,7 @@ async function mainMenu() {
         'View the total utilized budget of a department',
         'Quit',
     ];
+    // The map menu items with their sql queries
     const sqlQueries = {
         'View all departments': 'SELECT * FROM department;',
         'View all roles': `SELECT role.title AS Role, role.id AS ID, IFNULL(department.name, '--') AS Department, role.salary AS Salary FROM role Left JOIN department ON department.id = role.department_id;`,
@@ -195,7 +207,7 @@ async function mainMenu() {
         'Add a role': 'INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?);',
         'Add an employee': 'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?);',
         'Update employee role': 'UPDATE employee SET role_id = ? WHERE id = ?;',
-        'Update employee managers': 'UPDATE employee SET manager_id = ? WHERE id = ?;',
+        'Update employee manager': 'UPDATE employee SET manager_id = ? WHERE id = ?;',
         'View employees by manager': `SELECT employee.id AS EmployeeID, employee.first_name AS FirstName, employee.last_name AS LastName, IFNULL(role.title, '--') AS JobTitle, IFNULL(department.name, '--') AS Department, IFNULL(role.salary, '--') AS Salary, CONCAT(IFNULL(manager.first_name, '--'), ' ', IFNULL(manager.last_name, '--')) AS Manager FROM employee Left JOIN role ON employee.role_id = role.id Left JOIN department ON role.department_id = department.id LEFT JOIN employee AS manager ON employee.manager_id = manager.id  where employee.manager_id = ? ORDER BY employee.id`,
         'View employees by department': `SELECT employee.first_name AS FirstName, employee.last_name AS LastName, IFNULL(role.title, '--') AS JobTitle, IFNULL(department.name, '--') AS Department FROM employee left join role on role.id = role_id left join department on department.id = role.department_id where department.id = ?;`,
         'Delete department': 'DELETE FROM department WHERE id = ?;',
@@ -215,7 +227,7 @@ async function mainMenu() {
         const sqlQuery = sqlQueries[selectedMenuItem];
         let sqlArgs = '';
         let message = '';
-        ///////////////////////////////////// switch //////////////////////////////////
+        //menu items selection
         switch (selectedMenuItem) {
             case 'Add a department':
                 sqlArgs = await promptDepartments();
@@ -233,32 +245,37 @@ async function mainMenu() {
             case 'Add an employee':
                 //to enter the name, salary, and department for the role and that role is added to the database
                 sqlArgs = Object.values(await promptEmployees());
-                console.log(sqlQuery + sqlArgs);
                 message = `<${sqlArgs}> employee was added. Select View all employee option to see it.`;
                 const employee = await fetchDataFromDB(sqlQuery, sqlArgs, message);
                 await mainMenu();
                 break;
             case 'Update employee role':
                 sqlArgs = Object.values(await promptEmployeeRole());
-                console.log(sqlQuery + sqlArgs);
                 message = `<${sqlArgs}> employee's role was updated. Select View all employee option to see it.`;
                 const employeeUpdate = await fetchDataFromDB(sqlQuery, sqlArgs, message);
                 await mainMenu();
                 break;
-            // Handle other menu options
-            // 'Update employee managers',
+            case 'Update employee manager':
+                //'UPDATE employee SET manager_id = ? WHERE id = ?;',
+                const employeeForUpdate = Object.values(await promptEmployeeId());
+                const managerNewValue = Object.values(await promptManagerId());
+                sqlArgs = [managerNewValue[1], employeeForUpdate[1]]
+                message = `<${sqlArgs}> employee's role was updated. Select View all employee option to see it.`;
+                const employeeNewManager = await fetchDataFromDB(sqlQuery, sqlArgs, message);
+                await mainMenu();
+                break;
             case 'View employees by manager':
                 sqlArgs = await promptManagerId();
                 const viewEmployeesByManager = await fetchDataFromDB(sqlQuery, sqlArgs.id);
                 showTable(viewEmployeesByManager);
                 await mainMenu();
-                break;               
+                break;
             case 'View employees by department':
                 sqlArgs = await promptDepartmentId();
                 const viewEmployeesByDepartment = await fetchDataFromDB(sqlQuery, sqlArgs.id);
                 showTable(viewEmployeesByDepartment);
                 await mainMenu();
-                break;            
+                break;
             case 'Delete department':
                 sqlArgs = await promptDepartmentId();
                 message = `<${sqlArgs.name}> department was deleted. Select View all departments option to see it.`;
@@ -270,13 +287,13 @@ async function mainMenu() {
                 message = `<${sqlArgs.name}> role was deleted. Select View all roles option to see it.`;
                 const roleDeleted = await deleteRole(sqlArgs.id, message);
                 await mainMenu();
-                break;    
-                case 'Delete employee':
-                    sqlArgs = await promptEmployeeId();
-                    message = `<${sqlArgs.name}> employee was deleted. Select View all employees option to see it.`;
-                    const deleteEmployee = await fetchDataFromDB(sqlQuery, sqlArgs.id, message);
-                    await mainMenu();
-                    break;       
+                break;
+            case 'Delete employee':
+                sqlArgs = await promptEmployeeId();
+                message = `<${sqlArgs.name}> employee was deleted. Select View all employees option to see it.`;
+                const deleteEmployee = await fetchDataFromDB(sqlQuery, sqlArgs.id, message);
+                await mainMenu();
+                break;
             case 'View the total utilized budget of a department':
                 sqlArgs = await promptDepartmentId();
                 message = ''; //`<${sqlArgs.name}> department's budget is below:`;
@@ -284,10 +301,11 @@ async function mainMenu() {
                 const budgetValue = [{ Department: sqlArgs.name, Budget: budgetArray[0].total_budget }]
                 showTable(budgetValue);
                 await mainMenu();
-                break;                       
+                break;
             case 'Quit':
                 console.log('\x1b[33m%s\x1b[0m', 'Goodbye!');
                 break;
+            // all view all options
             default:
                 // Run the SQL query based on the selected menu item
                 console.log('Running query:', sqlQuery);
@@ -305,7 +323,7 @@ async function mainMenu() {
     }
 
 }
-
+// export module functions
 module.exports = {
     mainMenu,
 };

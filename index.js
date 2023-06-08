@@ -28,16 +28,15 @@
 // Connect Menu module
 const {mainMenu} = require('./helpers/menuUtils');
 const dbUtils = require('./helpers/dbUtils');
-//const apiUtils = require('./helpers/apiUtils');
 
 
 
 // Function to initialize app
 function init() {
     console.log('\x1b[33m%s\x1b[0m', `Welcome to the Employee Manager!`);
-
     mainMenu();
 
 }
-// Function call to initialize app
+
+// Start of the application
 init();

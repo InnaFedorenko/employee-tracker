@@ -29,7 +29,22 @@ async function fetchDataFromDB(query, args, message) {
           database.pool.end();
         }
       }
+async function getAllDepartments (){  
+  const departmentData = await fetchDataFromDB('SELECT * FROM department');
+  return departmentData
+}
+async function getAllRoles (){  
+  const roleData = await fetchDataFromDB(`SELECT CONCAT(role.title, ' - ' , department.name) AS role, role.id AS id, department.name AS department, role.salary AS Salary FROM role JOIN department ON department.id = role.department_id;`);
+  return roleData;
+}
+async function getAllEmployee(){  
+  const managersData = await fetchDataFromDB(`SELECT employee.id AS id, CONCAT(IFNULL(employee.first_name, '--'), ' ', IFNULL(employee.last_name, '--')) AS name FROM employee;`);
+  return managersData;
+}
 
 module.exports = {
-    fetchDataFromDB
+    fetchDataFromDB,
+    getAllDepartments,
+    getAllRoles,
+    getAllEmployee
 };

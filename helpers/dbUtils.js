@@ -20,7 +20,7 @@ async function fetchDataFromDB(query, args, message) {
   const database = new Database(config);
   try {
     const data = await database.query(query, args);
-    if (message) { console.log('\x1b[32m%s\x1b[0m', message) };
+    //if (message) { console.log('\x1b[32m%s\x1b[0m', message) };
     return data;
   } catch (error) {
     console.error('Error:', error);

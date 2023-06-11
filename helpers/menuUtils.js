@@ -308,7 +308,7 @@ async function mainMenu() {
             // all view all options
             default:
                 // Run the SQL query based on the selected menu item
-                console.log('Running query:', sqlQuery);
+                //console.log('Running query:', sqlQuery);
                 const dbData = await fetchDataFromDB(sqlQuery, sqlArgs);
                 showTable(dbData);
                 // After running the query, return to the main menu

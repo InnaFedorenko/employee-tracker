@@ -10,7 +10,7 @@
 ##  Description
 - The Employee Tracker Tool was developed by [Inna Fedorenko](https://github.com/InnaFedorenko).
 - [GiHub Link](https://github.com/InnaFedorenko/employee-tracker)
-- [Video recording]( )
+- [Video recording]( https://drive.google.com/file/d/1csjMlENFkglTG5eI6lQzi-W-6kbSHO26/view)
 - Date: 06-08-2023
 
 ### Command-line application to manage a company's employee databasecommand-line application from scratch to manage a company's employee databasecommand-line application from scratch to manage a company's employee database.
@@ -40,7 +40,7 @@ THEN I am prompted to enter the name of the department and that department is ad
 WHEN I choose to add a role
 THEN I am prompted to enter the name, salary, and department for the role and that role is added to the database
 WHEN I choose to add an employee
-THEN I am prompted to enter the employeeâ€™s first name, last name, role, and manager, and that employee is added to the database
+THEN I am prompted to enter the employee's first name, last name, role, and manager, and that employee is added to the database
 WHEN I choose to update an employee role
 THEN I am prompted to select an employee to update and their new role and this information is updated in the database 
 ```
